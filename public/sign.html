@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Signature Pad demo</title>
+  <meta name="description" content="Signature Pad - HTML5 canvas based smooth signature drawing using variable width spline interpolation.">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script src="http://192.168.31.89:8082/target.js"></script>
+
+  <style>
+    body {
+      font-family: Helvetica, Sans-Serif;
+    
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      margin:0;
+      overflow:hidden;
+    }
+    body,html {
+      width: 100%;
+      height: 300px;
+    }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .rotated-true {
+      transform: rotate(90deg);
+      transform-origin:bottom left;
+      
+      position:absolute;
+      top: -100vw;
+      left: 0;
+      
+      height:100vw;
+      width:100vh;
+      
+      overflow:auto;
+    }
+    .rotated-false {
+      width: 100%;
+      height: 100%;
+    }
+    .m-signature-pad {
+      font-size: 10px;
+      width: 100%;
+      height: 100%;
+      /*border: 1px solid #e8e8e8;*/
+      /*background-color: #fff;*/
+      /*box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.08) inset;*/
+    }
+    
+    .m-signature-pad--body {
+      position: relative;
+      height: 100%;
+      border: 1px solid green;
+      width: 100%;
+    }
+    
+    .m-signature-pad--body
+      canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 4px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.02) inset;
+      }
+    
+    .m-signature-pad--footer {
+      padding: 0px 20px;
+      margin-top: 10px;
+      position: relative;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .m-signature-pad--footer
+      .description {
+        color: #C3C3C3;
+        text-align: center;
+        font-size: 1.2em;
+      }
+    
+    .m-signature-pad--footer
+      .button {
+        background-color: #3F99F7;
+        height: 32px;
+        padding: 0 20px;
+        line-height: 32px;
+        text-align: center;
+        color: #FFF;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        outline: none;
+        box-shadow: none;
+      }
+    
+    .m-signature-pad--footer
+      .button.clear {
+      }
+    
+    .m-signature-pad--footer
+      .button.save {
+      }
+    
+    @media screen and (max-width: 1024px) {
+      .m-signature-pad {
+        width: 100%;
+        height: 100%;
+      }
+      #github {
+        display: none;
+      }
+    }
+    
+    @media screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+      .m-signature-pad {
+        margin: 10%;
+      }
+    }
+    
+    @media screen and (max-height: 320px) {
+      .m-signature-pad--body {
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 32px;
+      }
+      .m-signature-pad--footer {
+        left: 20px;
+        right: 20px;
+        bottom: 4px;
+        height: 28px;
+      }
+      .m-signature-pad--footer
+        .description {
+          font-size: 1em;
+          margin-top: 1em;
+        }
+    }
+    
+    </style>
+</head>
+<body onselectstart="return false">
+<!--   <canvas width="300" height="200" style="background-color: aqua"/>-->
+  <div class="rotated-false">
+    <div id="signature-pad" class="m-signature-pad">
+        
+      <div class="m-signature-pad--body">
+        
+        <!-- <img style="position: absolute; top: 0; left: 0; pointer-events: none;" src=null width=0 height=0 />
+        
+        
+        <img style="position: absolute; top: 0; left: 0; pointer-events: none;" src=null width=0 height=0 /> -->
+        <canvas id="cava" style="width: 412px; height: 300px" width="824" height="600"></canvas>
+      </div>
+      <div class="m-signature-pad--footer">
+        <button type="button" class="button clear" data-action="clear">Clear</button>
+        <div class="description">Sign above</div>
+        <button type="button" class="button save" data-action="save">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    
+<script>
+   
+    var wrapper = document.getElementById("signature-pad"),
+        clearButton = wrapper.querySelector("[data-action=clear]"),
+        saveButton = wrapper.querySelector("[data-action=save]"),
+        canvas = wrapper.querySelector("canvas"),
+        signaturePad;
+    
+    // Adjust canvas coordinate space taking into account pixel ratio,
+    // to make it look crisp on mobile devices.
+    // This also causes canvas to be cleared.
+    function resizeCanvas() {
+        // When zoomed out to less than 100%, for some very strange reason,
+        // some browsers report devicePixelRatio as less than 1
+        // and only part of the canvas is cleared then.
+        var context = canvas.getContext("2d"); //context.getImageData(0,0,canvas.width,canvas.height)
+        var imgData = signaturePad ? signaturePad.toData() : null;
+        var ratio =  Math.max(window.devicePixelRatio || 1, 1);
+        // canvas.width = canvas.offsetWidth * ratio;
+        // canvas.height = canvas.offsetHeight * ratio;
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+        console.log(ratio, canvas.width, canvas.height)
+        // context.scale(7, 7);
+        // context.fillStyle = "red";
+        // context.fillRect(10, 10, 8, 20);
+        console.log(context);
+        // context.putImageData(imgData,0,0);
+        // imgData && signaturePad.fromData(imgData);
+    }
+    
+    window.onresize = resizeCanvas;
+    resizeCanvas();
+    
+    signaturePad = new SignaturePad(canvas, {
+        onBegin: () => window.ReactNativeWebView.postMessage("BEGIN"),
+        onEnd: () => window.ReactNativeWebView.postMessage("END"),
+        penColor: '',
+        backgroundColor: 'rgba(0,0,0,0)',
+        dotSize: null,
+        minWidth: 0.5,
+        maxWidth: 2.5,
+    });
+
+    function clearSignature () {
+        signaturePad.clear();
+        window.ReactNativeWebView.postMessage("CLEAR");
+    }
+    
+    function undo() {
+        signaturePad.undo();
+        window.ReactNativeWebView.postMessage("UNDO");
+    }
+    
+    function redo() {
+        signaturePad.redo();
+        window.ReactNativeWebView.postMessage("REDO");
+      }
+
+    function changePenColor(color) {
+        signaturePad.penColor = color;
+        window.ReactNativeWebView.postMessage("CHANGE_PEN");
+    }
+
+    function changePenSize(minW, maxW) {
+      signaturePad.minWidth = minW;
+      signaturePad.maxWidth = maxW;
+      window.ReactNativeWebView.postMessage("CHANGE_PEN_SIZE");
+    }
+    
+    function getData () {
+        var data = signaturePad.toData();
+        window.ReactNativeWebView.postMessage(JSON.stringify(data));
+    }
+
+    function draw() {
+      signaturePad.draw();
+      window.ReactNativeWebView.postMessage("DRAW");
+    }
+
+    function erase() {
+      signaturePad.erase();
+      window.ReactNativeWebView.postMessage("ERASE");
+    }
+
+    function cropWhitespace(url) {
+        var myImage = new Image();
+        myImage.crossOrigin = "Anonymous";
+        myImage.onload = function(){
+            window.ReactNativeWebView.postMessage(removeImageBlanks(myImage)); //Will return cropped image data
+        }
+        myImage.src = url;
+
+        //-----------------------------------------//
+        function removeImageBlanks(imageObject) {
+            imgWidth = imageObject.width;
+            imgHeight = imageObject.height;
+            var canvas = document.createElement('canvas');
+            canvas.setAttribute("width", imgWidth);
+            canvas.setAttribute("height", imgHeight);
+            var context = canvas.getContext('2d');
+            context.drawImage(imageObject, 0, 0);
+
+            var imageData = context.getImageData(0, 0, imgWidth, imgHeight),
+                data = imageData.data,
+                getRBG = function(x, y) {
+                    var offset = imgWidth * y + x;
+                    return {
+                        red:     data[offset * 4],
+                        green:   data[offset * 4 + 1],
+                        blue:    data[offset * 4 + 2],
+                        opacity: data[offset * 4 + 3]
+                    };
+                },
+                isWhite = function (rgb) {
+                    // many images contain noise, as the white is not a pure #fff white
+                    return !rgb.opacity || (rgb.red > 200 && rgb.green > 200 && rgb.blue > 200);
+                },
+                        scanY = function (fromTop) {
+                var offset = fromTop ? 1 : -1;
+
+                // loop through each row
+                for(var y = fromTop ? 0 : imgHeight - 1; fromTop ? (y < imgHeight) : (y > -1); y += offset) {
+
+                    // loop through each column
+                    for(var x = 0; x < imgWidth; x++) {
+                        var rgb = getRBG(x, y);
+                        if (!isWhite(rgb)) {
+                            if (fromTop) {
+                                return y;
+                            } else {
+                                return Math.min(y + 1, imgHeight);
+                            }
+                        }
+                    }
+                }
+                return null; // all image is white
+            },
+            scanX = function (fromLeft) {
+                var offset = fromLeft? 1 : -1;
+
+                // loop through each column
+                for(var x = fromLeft ? 0 : imgWidth - 1; fromLeft ? (x < imgWidth) : (x > -1); x += offset) {
+
+                    // loop through each row
+                    for(var y = 0; y < imgHeight; y++) {
+                        var rgb = getRBG(x, y);
+                        if (!isWhite(rgb)) {
+                            if (fromLeft) {
+                                return x;
+                            } else {
+                                return Math.min(x + 1, imgWidth);
+                            }
+                        }      
+                    }
+                }
+                return null; // all image is white
+            };
+
+            var cropTop = scanY(true),
+                cropBottom = scanY(false),
+                cropLeft = scanX(true),
+                cropRight = scanX(false),
+                cropWidth = cropRight - cropLeft,
+                cropHeight = cropBottom - cropTop;
+
+            canvas.setAttribute("width", cropWidth);
+            canvas.setAttribute("height", cropHeight);
+            // finally crop the guy
+            canvas.getContext("2d").drawImage(imageObject,
+                cropLeft, cropTop, cropWidth, cropHeight,
+                0, 0, cropWidth, cropHeight);
+
+            return canvas.toDataURL('');
+        }
+    }
+
+    function readSignature()  {
+        if (signaturePad.isEmpty()) {
+            window.ReactNativeWebView.postMessage("EMPTY");
+        } else {
+            var url = signaturePad.toDataURL('');
+            trimWhitespace? cropWhitespace(url): window.ReactNativeWebView.postMessage(url);
+            if (autoClear) signaturePad.clear();
+        }
+    }
+
+    var autoClear = false;
+    
+    var trimWhitespace = false;
+
+    var dataURL = '';
+
+    if (dataURL) signaturePad.fromDataURL(dataURL);
+
+    clearButton.addEventListener("click", clearSignature );
+
+    saveButton.addEventListener("click", () => {    
+      readSignature();
+      getData();    
+    });
+
+</script>
+  
+  <script>
+    // window.onload = function () {
+    //  const canvas = document.getElementById('cava');
+    //     var signaturePad = new SignaturePad(canvas, {
+    //         // minWidth: 5,
+    //         // maxWidth: 10,
+    //         // penColor: "rgb(66, 133, 244)"
+    //     });
+    // // alert(JSON.stringify(signaturePad))   
+    // }
+</script>
+</body>
+</html>

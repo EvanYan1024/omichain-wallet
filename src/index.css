@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 71.43% 6.86%;
+    --muted: 216 23.81% 95.88%;
+    --muted-foreground: 220.65 13.19% 46.08%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 71.43% 6.86%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 71.43% 6.86%;
+    --border: 210 18.18% 95.69%;
+    --input: 210 18.18% 95.69%;
+    --primary: 16.93 82.11% 48.24%;
+    --primary-foreground: 240 33.33% 99.41%;
+    --secondary: 216 23.81% 95.88%;
+    --secondary-foreground: 240 100% 3.33%;
+    --accent: 216 23.81% 95.88%;
+    --accent-foreground: 240 100% 3.33%;
+    --destructive: 3.91 85.98% 58.04%;
+    --destructive-foreground: 240 33.33% 99.41%;
+    --ring: 20.87, 86.61%, 53.14%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 71.43% 6.86%;
+    --foreground: 240 33.33% 99.41%;
+    --muted: 228.46 37.14% 13.73%;
+    --muted-foreground: 217.78 15.08% 64.9%;
+    --popover: 240 71.43% 6.86%;
+    --popover-foreground: 240 33.33% 99.41%;
+    --card: 240 71.43% 6.86%;
+    --card-foreground: 240 33.33% 99.41%;
+    --border: 228.46 37.14% 13.73%;
+    --input: 228.46 37.14% 13.73%;
+    --primary: 16.93 82.11% 48.24%;
+    --primary-foreground: 240 33.33% 99.41%;
+    --secondary: 228.46 37.14% 13.73%;
+    --secondary-foreground: 240 33.33% 99.41%;
+    --accent: 228.46 37.14% 13.73%;
+    --accent-foreground: 240 33.33% 99.41%;
+    --destructive: 3.91 85.98% 58.04%;
+    --destructive-foreground: 240 33.33% 99.41%;
+    --ring: 20.87 86.61% 53.14%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}

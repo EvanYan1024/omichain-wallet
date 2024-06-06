@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    canvas {
+        border: 1px solid #ccc;
+    }
+</style>
+
+<body>
+    <canvas id="cv" width="210" height="400"></canvas>
+    <br />
+    <button onclick="draw()">draw</button>
+</body>
+
+<script>
+     var canvas = document.getElementById('cv');
+        var ctx = canvas.getContext('2d');
+        
+    function draw() {
+        var cv = document.getElementById('cv');
+        var ct = cv.getContext('2d');
+        //ct.save();
+
+        var w = cv.width;
+        var h = cv.height;
+
+        ct.clearRect(0, 0, w, h);
+        ct.fillStyle = 'rgba(0, 255, 0, 1.0)';
+        ct.fillRect(0, 0, w, h);
+
+        ct.strokeStyle = 'rgba(127, 127, 255, 1.0)';
+        ct.fillStyle = 'rgba(0, 0, 255, 1.0)';
+        ct.lineWidth = 5;
+        ct.beginPath();
+        ct.arc(w / 2, h / 2, w / 2, h / 2, 0, 2 * Math.PI, 0);
+        ct.closePath();
+        //ct.stroke();
+        ct.fill();
+
+        //ct.restore();
+    }
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    // 开始绘制
+    function startDrawing(e) {
+        e.preventDefault();
+        isDrawing = true;
+        [lastX, lastY] = [e.touches[0].clientX, e.touches[0].clientY];
+        ctx.beginPath();
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.globalAlpha = 1;
+    }
+
+    // 绘制中
+    function draw(e) {
+        e.preventDefault();
+        if (!isDrawing) return;
+        const [x, y] = [e.touches[0].clientX, e.touches[0].clientY];
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        [lastX, lastY] = [x, y];
+    }
+
+    // 结束绘制
+    function endDrawing() {
+        isDrawing = false;
+        ctx.endPath();
+    }
+
+    // 清除画布
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function onConfirm() {
+        var url = canvas.toDataURL();
+        window.ReactNativeWebView.postMessage(url);
+    }
+
+    // 添加事件监听器
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', endDrawing);
+</script>
+
+</html>
