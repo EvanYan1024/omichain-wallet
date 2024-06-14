@@ -2,8 +2,8 @@
 import { BrowserProvider } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { getAddress } from 'ethers';
-import { Button } from '@chakra-ui/react';
-import { fetchToken } from 'wagmi/actions';
+import { Button, useToast } from '@chakra-ui/react';
+import { fetchToken, signMessage } from 'wagmi/actions';
 import { WagmiProvider, useAccount, useChainId } from 'wagmi';
 import { useConnect } from 'wagmi'
 // import { injected } from 'wagmi/connectors'
@@ -49,6 +49,7 @@ const ETHWalletContainer = () => {
     const chainId = useChainId();
     const { connect } = useConnect()
     const { address } = useAccount();
+    const toast = useToast();
     // const { connectors, switchAccount } = useSwitchAccount()
     // const connections = useConnections()
 
@@ -96,22 +97,39 @@ const ETHWalletContainer = () => {
 
 
     async function signInWithEthereum() {
-        // const signer = await provider.getSigner();
-        const accounts = await window.ethereum.request({
-            method: 'eth_requestAccounts'
-        });
-        const address = getAddress(accounts[0]);
-        const message = createSiweMessage(
-            address,
-            'Sign in with Ethereum to the app.'
-        );
-        console.log(message, 'msg')
-        const signature = await window.ethereum?.request({
-            method: 'personal_sign',
-            params: [message, address],
-        });
-        console.log(signature)
-        // console.log(await signer.signMessage(message));
+        try {
+            // const signer = await provider.getSigner();
+            // const accounts = await window.ethereum.request({
+            //     method: 'eth_requestAccounts'
+            // });
+            // const address = getAddress(accounts[0]);
+            const message = createSiweMessage(
+                address,
+                'Sign in with Ethereum to the app.'
+            );
+            console.log(message, 'msg')
+            // const signature = await window.ethereum?.request({
+            //     method: 'personal_sign',
+            //     params: [message, address],
+            // });
+            const res = await signMessage(wagmiConfig, {
+                message,
+            })
+            console.log(res)
+            toast({
+                title: 'Sign Success',
+                description: res,
+                status: 'success',
+            })
+            // console.log(await signer.signMessage(message));
+        } catch (error: any) {
+            console.error(error);
+            toast({
+                title: 'Failed',
+                description: error.message,
+                status: 'error',
+            })
+        }
     }
 
     const getToken = async () => {
@@ -123,13 +141,15 @@ const ETHWalletContainer = () => {
         console.log(res);
     }
     return (
-        <div>
-            <div className='flex'>
+        <div className='p-6 space-y-6'>
+            <div className='flex justify-end mb-6'>
                 <w3m-button />
             </div>
 
-            <div><Button id='connectWalletBtn' onClick={connectWallet}>{address || 'Connect wallet'}</Button></div>
-            <div><button id='siweBtn' onClick={signInWithEthereum}>Sign-in with Ethereum</button></div>
+            <div>
+                <Button id='connectWalletBtn' onClick={connectWallet}>{address || 'Connect wallet'}</Button>
+            </div>
+            <div><Button id='siweBtn' onClick={signInWithEthereum}>Sign Message</Button></div>
 
             <Button onClick={getToken}>Fetch token</Button>
             <Button onClick={switchAccountFunc}>Switch Account</Button>
@@ -142,7 +162,7 @@ const queryClient = new QueryClient()
 
 export const ETHWallet = () => {
     return (
-        <WagmiProvider config={wagmiConfig}>
+        <WagmiProvider config={wagmiConfig} >
             <QueryClientProvider client={queryClient}>
                 <ETHWalletContainer />
             </QueryClientProvider>

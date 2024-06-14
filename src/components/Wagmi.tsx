@@ -3,10 +3,10 @@ import { http, createConfig } from 'wagmi'
 import { mainnet, sepolia, polygon } from 'wagmi/chains'
 
 export const wagmiConfig = createConfig({
-  chains: [polygon],
+  chains: [polygon, sepolia, mainnet],
   transports: {
-    // [mainnet.id]: http(),
-    // [sepolia.id]: http(),
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
     [polygon.id]: http(),
   },
 })

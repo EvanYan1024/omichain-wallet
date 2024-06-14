@@ -2,14 +2,14 @@ import { createWeb3Modal } from '@web3modal/wagmi/react'
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config'
 
 import { WagmiProvider } from 'wagmi'
-import { arbitrum, mainnet } from 'wagmi/chains'
+import { arbitrum, baseSepolia, mainnet, sepolia } from 'wagmi/chains'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // 0. Setup queryClient
 const queryClient = new QueryClient()
 
 // 1. Get projectId at https://cloud.walletconnect.com
-const projectId = 'c88ecd2e8c3f5593cfea8b86d48f3a7a'
+const projectId = '70547224c970709296535f0d14fd43a3'
 
 // 2. Create wagmiConfig
 const metadata = {
@@ -19,22 +19,19 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 }
 
-const chains = [mainnet, arbitrum] as const
+const chains = [mainnet, arbitrum, sepolia, baseSepolia] as const
 const config = defaultWagmiConfig({
   chains, // required
   projectId, // required
   metadata, // required
-  enableWalletConnect: true, // Optional - true by default
-  enableInjected: true, // Optional - true by default
-  enableEIP6963: true, // Optional - true by default
-  enableCoinbase: true, // Optional - true by default
 })
 
 // 3. Create modal
 createWeb3Modal({
   wagmiConfig: config,
   projectId,
-  enableAnalytics: true // Optional - defaults to your Cloud configuration
+  enableAnalytics: true,
+  includeWalletIds: ['5864e2ced7c293ed18ac35e0db085c09ed567d67346ccb6f58a0327a75137489']
 })
 
 export function Web3Provider({ children }: any) {

@@ -56,6 +56,7 @@ function App() {
     <>
       <div className='flex items-center gap-4'>
         <Link to='/'>Home</Link>
+        <Link to='/web3modal'>Web3Modal</Link>
         <Link to='/signin'>SignIn</Link>
         <Link to='/eth'>ETH</Link>
         <Link to='/rainbow'>Rainbow</Link>

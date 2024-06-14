@@ -8,6 +8,7 @@ import { RainbowAppPage } from "./pages/Rainbow";
 import SignIn from "./pages/SignIn";
 import { DocuSign } from "./pages/DocuSign.tsx";
 import { StarknetProvider } from "./pages/StarkNet.tsx";
+import { Web3ModalPage } from "./pages/Web3Modal.tsx";
 
 
 const routerConfig = [
@@ -18,6 +19,10 @@ const routerConfig = [
             {
                 path: "/eth",
                 element: <ETHWallet />,
+            },
+            {
+                path: "/web3modal",
+                element: <Web3ModalPage />,
             },
             {
                 path: "/rainbow",
