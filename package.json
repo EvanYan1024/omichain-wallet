@@ -16,7 +16,6 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@ethsign/ui": "^0.1.6",
     "@ethsign/utils-web": "^0.3.9",
     "@faker-js/faker": "^8.1.0",
@@ -55,9 +54,11 @@
     "ton-core": "^0.53.0",
     "valtio": "^1.13.2",
     "viem": "^2.13.6",
+    "vite-plugin-node-polyfills": "^0.22.0",
     "wagmi": "^2.9.9"
   },
   "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
