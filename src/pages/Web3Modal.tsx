@@ -1,9 +1,7 @@
 
 import { SiweMessage } from 'siwe';
 import { Button, useToast } from '@chakra-ui/react';
-import { signMessage } from 'wagmi/actions';
-import { useAccount, useChainId } from 'wagmi';
-import { wagmiConfig } from '../components/Wagmi';
+import {useAccount, useChainId, useWalletClient} from 'wagmi';
 import { Web3Provider } from '../components/Web3Modal';
 
 
@@ -39,6 +37,7 @@ const AccountInfo = () => {
 const ETHWalletContainer = () => {
     const { address } = useAccount();
     const toast = useToast();
+    const wc = useWalletClient();
 
 
     async function signInWithEthereum() {
@@ -48,7 +47,8 @@ const ETHWalletContainer = () => {
                 'Sign in with Ethereum to the app.'
             );
             console.log(message, 'msg')
-            const res = await signMessage(wagmiConfig, {
+            console.log(wc, 'wc');
+            const res = await wc.data?.signMessage({
                 message,
             })
             console.log(res)
