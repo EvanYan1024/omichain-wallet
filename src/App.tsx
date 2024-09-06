@@ -60,11 +60,11 @@ function App() {
         <Link to='/signin'>SignIn</Link>
         <Link to='/eth'>ETH</Link>
         <Link to='/rainbow'>Rainbow</Link>
-        <Link>ADA</Link>
-        <Link to='/starknet'>Stark</Link>
-        <Link>TON</Link>
-        <Link>OKX</Link>
-        <Link to='/docusign'>Docusign</Link>
+        {/* <Link>ADA</Link> */}
+        <Link to='/starknet'>Starknet</Link>
+        {/* <Link>TON</Link>
+        <Link>OKX</Link> */}
+        {/* <Link to='/deploy'>Deploy Starknet Contract</Link> */}
       </div>
       <div>
         <Outlet />

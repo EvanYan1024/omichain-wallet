@@ -1,8 +1,12 @@
 
 import { SiweMessage } from 'siwe';
 import { Button, useToast } from '@chakra-ui/react';
-import {useAccount, useChainId, useWalletClient} from 'wagmi';
+import {useAccount, useChainId, useConfig, useWalletClient} from 'wagmi';
 import { Web3Provider } from '../components/Web3Modal';
+import {writeContract} from "wagmi/actions";
+import abi from './airdropABI.json';
+import {zkSync} from "wagmi/chains";
+import { airdropData } from './data.ts';
 
 
 const domain = window.location.host;
@@ -38,6 +42,29 @@ const ETHWalletContainer = () => {
     const { address } = useAccount();
     const toast = useToast();
     const wc = useWalletClient();
+    const config = useConfig();
+
+
+    const data = airdropData[address]?.allocations?.[0];
+
+    const claim = async () => {
+        try {
+            const hash = await writeContract(config, {
+                abi: abi,
+                address: '0x66Fd4FC8FA52c9bec2AbA368047A0b27e24ecfe4',
+                chainId: zkSync.id,
+                functionName: 'claim',
+                args: [
+                    data?.merkleIndex,
+                    data?.tokenAmount,
+                    data?.merkleProof
+                ],
+            });
+            console.log(hash, 'hash');
+        } catch(e) {
+            console.log(e);
+        }
+    }
 
 
     async function signInWithEthereum() {
@@ -71,9 +98,17 @@ const ETHWalletContainer = () => {
             <div className='flex justify-end mb-6'>
                 <w3m-button />
             </div>
-            <div><Button id='siweBtn' onClick={signInWithEthereum}>Sign Message</Button></div>
+            <div>
+                <Button onClick={signInWithEthereum}>Sign Message</Button>
+            </div>
+            <div>
+                <Button onClick={claim}>Claim</Button>
+            </div>
             <div>
                 <AccountInfo />
+                <div>
+                    {JSON.stringify(data)}
+                </div>
             </div>
         </div>
     )

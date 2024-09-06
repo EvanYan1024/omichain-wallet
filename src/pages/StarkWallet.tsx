@@ -1,13 +1,15 @@
 
-import { connect, disconnect } from 'starknetkit'
-import { shortString, Contract, typedData } from "starknet";
+import { connect, disconnect, useStarknetkitConnectModal } from 'starknetkit'
+import { shortString, Contract, typedData, hash } from "starknet";
 import ArgentAccountABI from '../ArgentAccount.json';
 import { useState } from 'react';
-import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, useDisclosure } from '@chakra-ui/react';
+import { Button, FormLabel, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Textarea, useDisclosure } from '@chakra-ui/react';
 import { fetchToken } from '../utils/fetchToken';
 
-import {useConnect, Connector, useAccount, useNetwork} from "@starknet-react/core";
-import { useSNRC20Contract } from '../utils/useSNRC20Contract';
+import { useConnect, Connector, useAccount, useNetwork } from "@starknet-react/core";
+
+import casmData from './data/cairo1_HelloCairo.compiled_contract_class.json';
+import sierraData from './data/cairo1_HelloCairo.contract_class.json';
 
 
 const typedDataValidate = {
@@ -69,6 +71,15 @@ export default function ConnectModal() {
 export const StarkWallet = () => {
   const [connection, setConnection] = useState<any>(null);
   const network = useNetwork();
+  const { account } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { starknetkitConnectModal } = useStarknetkitConnectModal({
+    connectors: connectors as any
+  })
+
+  const [sierra, setSierra] = useState(JSON.stringify(sierraData));
+
+  const [casm, setCasm] = useState(JSON.stringify(casmData));
 
   const connectStark = async () => {
     const connection = await connect();
@@ -100,24 +111,55 @@ export const StarkWallet = () => {
 
   const fetchToken1 = async () => {
     //0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49
-    const token = await fetchToken('0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d');
+    // 0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d
+    // 
+    const token = await fetchToken('0x1c94c8f659e01b704bac76d907dd6fa253d52515f720afbdfdf383ec4d78817');
     console.log(token);
   }
 
-  const { deploy } = useSNRC20Contract();
+  const connectWallet = async () => {
+    const { connector } = await starknetkitConnectModal()
+    await connect({ connector })
+  }
 
-  const onDeploy = () => {
-    deploy();
+  const onDeclare = async () => {
+    try {
+      const data = JSON.parse(sierra);
+      const classHash = hash.computeContractClassHash(data)
+      const compiledClassHash = hash.computeCompiledClassHash(JSON.parse(casm))
+      const res = await account?.declare({
+        contract: data,
+        classHash: classHash,
+        compiledClassHash: compiledClassHash,
+      });
+      console.log(res, 'res');
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   console.log(network, 'network')
 
   return (
     <div>
-      <button onClick={connectStark}>{connection ? connection.selectedAddress : 'Connect Stark Wallet'}</button>
-      <Button onClick={fetchToken1}>Fetch Token</Button>
-      <ConnectModal />
-      <Button onClick={onDeploy}>deploy</Button>
+      <div className='flex justify-end'>
+        <Button onClick={connectWallet}>{account ? account.address : 'Connect Wallet'}</Button>
+      </div>
+      <div className='p-6 space-y-6'>
+
+        {/* <button onClick={connectStark}>{connection ? connection.selectedAddress : 'Connect Stark Wallet'}</button> */}
+        {/* <Button onClick={fetchToken1}>Fetch Token</Button> */}
+        {/* <ConnectModal /> */}
+        <div>
+          <FormLabel>Contract Sierra</FormLabel>
+          <Textarea placeholder="Enter your contract sierra here" value={sierra} onChange={e => setSierra(e.target.value)} />
+        </div>
+        <div>
+          <FormLabel>Contract Casm</FormLabel>
+          <Textarea placeholder="Enter your contract casm here" value={casm} onChange={e => setCasm(e.target.value)} />
+        </div>
+        <Button onClick={onDeclare}>declare</Button>
+      </div>
     </div>
   )
 }

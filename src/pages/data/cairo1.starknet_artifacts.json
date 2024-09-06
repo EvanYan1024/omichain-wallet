@@ -1,0 +1,1 @@
+{"version":1,"contracts":[{"id":"r5fnqo7mopmm0","package_name":"cairo1","contract_name":"HelloCairo","module_path":"cairo1::HelloCairo","artifacts":{"sierra":"cairo1_HelloCairo.contract_class.json","casm":"cairo1_HelloCairo.compiled_contract_class.json"}}]}

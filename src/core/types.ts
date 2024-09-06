@@ -17,6 +17,7 @@ export enum ChainType {
     EVM = 'evm',
     StarkNet = 'starknet',
     Ton = 'ton',
+    Solana = 'solana',
 }
 
 export enum ExtendedWalletType {

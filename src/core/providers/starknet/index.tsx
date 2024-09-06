@@ -68,9 +68,16 @@ export class StarknetWallet extends WalletBase {
 
   async sign(_message: string) {
     const account = starknetStore.account;
+    console.log('start')
     const res = await account?.account?.signMessage(JSON.parse(_message));
+    console.log(res, 'res');
 
     return { message: _message, signature: (res as string[]).join(',') };
+    // try {
+    //
+    // } catch (e) {
+    //   console.log(e);
+    // }
   }
 
   async signin(statement?: string): Promise<ISignResult> {

@@ -8,7 +8,20 @@ export const fetchToken = async (address: string, chainId?: number, account?: st
     // const provider = new RpcProvider({ nodeUrl: 'https://starknet-mainnet.infura.io/v3/a2ab6d6bba0d466cade2c371d55b8134'});
     const provider = new RpcProvider({ nodeUrl: 'https://starknet-mainnet.public.blastapi.io' })
     console.log(provider);
-    const contract = new Contract(balanceABIFragment, address, provider);
+    const { abi } = await provider.getClassAt(address);
+
+    console.log(abi)
+    const contract = new Contract(abi, address, provider);
+
+    // const isCreate = await contract.is_createable();
+    // const isCancel = await contract.is_cancelable();
+
+    const res = await Promise.all([
+        contract.is_createable(),
+        contract.is_cancelable(),
+    ])
+
+    console.log(res, 'isCancel')
 
     const symbolNum = await contract.symbol();
     const name = await contract.name();

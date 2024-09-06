@@ -1,8 +1,9 @@
 import { StarknetWallet } from "./providers/starknet";
 import { WalletBase } from "./WalletBase";
-import { EvmWallet } from "./providers/evm/web3modal";
+import { EvmWallet } from "./providers/evm";
 import { ChainType } from "./types";
-import {TonWallet} from "./providers/ton";
+import { TonWallet } from "./providers/ton";
+import { SolWallet } from "./providers/solana";
 
 export abstract class WalletFactory {
     private static instances: Record<string, WalletBase> = {};
@@ -18,6 +19,9 @@ export abstract class WalletFactory {
                     break;
                 case ChainType.Ton:
                     WalletClass = TonWallet;
+                    break;
+                case ChainType.Solana:
+                    WalletClass = SolWallet;
                     break;
                 default:
                     throw new Error('Unsupported wallet type');

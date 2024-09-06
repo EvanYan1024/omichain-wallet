@@ -31,7 +31,7 @@ export const get4361Message = ({
     uri,
     address
 }: ISignInMessage): string => {
-    const header = `${domain} wants you to sign in with your Ethereum account:`;
+    const header = `${domain} wants you to sign in with your account:`;
     const uriField = `URI: ${uri}`;
     let prefix = [header, address].join('\n');
     const versionField = `Version: ${version}`;

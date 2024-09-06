@@ -1,9 +1,10 @@
 import { createWeb3Modal } from '@web3modal/wagmi/react'
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config'
 
-import { WagmiProvider } from 'wagmi'
+import { WagmiProvider, http, createConfig } from 'wagmi'
 import { arbitrum, baseSepolia, mainnet, sepolia } from 'wagmi/chains'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import {zkSync} from "viem/chains";
 
 // 0. Setup queryClient
 const queryClient = new QueryClient()
@@ -19,19 +20,26 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 }
 
-const chains = [mainnet, arbitrum, sepolia, baseSepolia] as const
+const chains = [zkSync,] as const
 const config = defaultWagmiConfig({
   chains, // required
   projectId, // required
   metadata, // required
 })
 
+const wagmiConfig = createConfig({
+  chains: [zkSync],
+  transports: {
+    [zkSync.id]: http('https://zksync-mainnet.blastapi.io/98c434a6-dc37-4c53-811b-8cb19efd1bdc'),
+  },
+})
+
 // 3. Create modal
 createWeb3Modal({
   wagmiConfig: config,
   projectId,
-  enableAnalytics: true,
-  includeWalletIds: ['5864e2ced7c293ed18ac35e0db085c09ed567d67346ccb6f58a0327a75137489']
+  enableAnalytics: false,
+  // includeWalletIds: ['5864e2ced7c293ed18ac35e0db085c09ed567d67346ccb6f58a0327a75137489']
 })
 
 export function Web3Provider({ children }: any) {

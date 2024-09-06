@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import { ETHWallet } from "./pages/ETHWallet";
 import { ADAWallet } from "./pages/ADAWallet";
@@ -9,6 +9,7 @@ import SignIn from "./pages/SignIn";
 import { DocuSign } from "./pages/DocuSign.tsx";
 import { StarknetProvider } from "./pages/StarkNet.tsx";
 import { Web3ModalPage } from "./pages/Web3Modal.tsx";
+import Home from "./pages/Home.tsx";
 
 
 const routerConfig = [
@@ -16,6 +17,10 @@ const routerConfig = [
         path: "/",
         element: <App />,
         children: [
+            {
+                path: "/",
+                element: <Home />,
+            },
             {
                 path: "/eth",
                 element: <ETHWallet />,
@@ -48,14 +53,10 @@ const routerConfig = [
                 path: "signin",
                 element: <SignIn />,
             },
-            {
-                path: "docusign",
-                element: <DocuSign />,
-            },
         ],
     },
 ];
-const router = createBrowserRouter(routerConfig);
+const router = createHashRouter(routerConfig);
 
 export const Router = () => {
     return (

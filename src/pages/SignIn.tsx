@@ -1,11 +1,12 @@
 import { Button } from "@chakra-ui/react";
 import { WalletFactory } from "../core/WalletFactory";
 import { ChainType } from "../core/types";
-import { EvmProvider } from "../core/providers/evm/web3modal.tsx";
-import {config, projectId} from "../components/Rainbowkit";
+import { EvmProvider } from "../core/providers/evm";
+import { config, projectId } from "../components/Rainbowkit";
 import { StarknetProvider } from "../core/providers/starknet";
-import {useState} from "react";
-import {TonProvider} from "../core/providers/ton";
+import { useState } from "react";
+import { TonProvider } from "../core/providers/ton";
+import { SolanaProvider } from "../core/providers/solana/index.tsx";
 
 
 const SigninCore = () => {
@@ -19,7 +20,7 @@ const SigninCore = () => {
 
         const walletInfo = wallet.getWallet();
 
-        console.log(res,walletInfo);
+        console.log(res, walletInfo);
     }
 
     const handleDisconnect = () => {
@@ -50,6 +51,7 @@ const SigninCore = () => {
             <Button onClick={() => handleConnect(ChainType.EVM)}>EVM Connect</Button>
             <Button onClick={() => handleConnect(ChainType.StarkNet)}>StarkNet Connect</Button>
             <Button onClick={() => handleConnect(ChainType.Ton)}>Ton Connect</Button>
+            <Button onClick={() => handleConnect(ChainType.Solana)}>Solana Connect</Button>
         </div>
     )
 
@@ -67,7 +69,9 @@ export default function SignIn() {
                     <TonProvider config={{
                         manifestUrl: 'https://app.ethsign.xyz/manifest.json',
                     }}>
-                        <SigninCore />
+                        <SolanaProvider>
+                            <SigninCore />
+                        </SolanaProvider>
                     </TonProvider>
                 </StarknetProvider>
             </EvmProvider>
