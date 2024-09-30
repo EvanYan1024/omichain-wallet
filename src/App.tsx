@@ -7,6 +7,10 @@ import { TonConnectUI, toUserFriendlyAddress } from '@tonconnect/ui'
 import { EditTable } from './EditTable';
 import Compressor from 'compressorjs';
 import { Link, Outlet } from 'react-router-dom';
+import { ENVS } from './constants';
+import { AuthType } from '@particle-network/auth-core';
+import { AuthCoreContextProvider } from '@particle-network/authkit';
+import { mainnet } from '@particle-network/authkit/chains';
 
 
 
@@ -53,7 +57,15 @@ const Home = () => {
 
 function App() {
   return (
-    <>
+    <> <AuthCoreContextProvider
+      options={{
+        projectId: ENVS.NEXT_PUBLIC_PARTICLE_PROJECT_ID!,
+        clientKey: ENVS.NEXT_PUBLIC_PARTICLE_CLIENT_KEY!,
+        appId: ENVS.NEXT_PUBLIC_PARTICLE_APP_ID!,
+        chains: [mainnet], //optional: current chain name, default Ethereum.
+        authTypes: [AuthType.google, AuthType.twitter]
+      }}
+    >
       <div className='flex items-center gap-4'>
         <Link to='/'>Home</Link>
         <Link to='/web3modal'>Web3Modal</Link>
@@ -69,6 +81,7 @@ function App() {
       <div>
         <Outlet />
       </div>
+    </AuthCoreContextProvider>
     </>
   )
 }

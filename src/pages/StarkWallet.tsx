@@ -125,11 +125,13 @@ export const StarkWallet = () => {
   const onDeclare = async () => {
     try {
       const data = JSON.parse(sierra);
+      const casmRes = JSON.parse(casm);
       const classHash = hash.computeContractClassHash(data)
-      const compiledClassHash = hash.computeCompiledClassHash(JSON.parse(casm))
+      const compiledClassHash = hash.computeCompiledClassHash(casmRes)
       const res = await account?.declare({
         contract: data,
         classHash: classHash,
+        casm: casmRes,
         compiledClassHash: compiledClassHash,
       });
       console.log(res, 'res');
