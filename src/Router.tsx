@@ -10,6 +10,9 @@ import { DocuSign } from "./pages/DocuSign.tsx";
 import { StarknetProvider } from "./pages/StarkNet.tsx";
 import { Web3ModalPage } from "./pages/Web3Modal.tsx";
 import Home from "./pages/Home.tsx";
+import Game from "./pages/Game.tsx";
+import NotFound from "./pages/404/index.tsx";
+import SolanaToken from './pages/SolanaToken';
 
 
 const routerConfig = [
@@ -53,10 +56,22 @@ const routerConfig = [
                 path: "signin",
                 element: <SignIn />,
             },
+            {
+                path: "game",
+                element: <Game />,
+            },
+            {
+                path: '/solana-token',
+                element: <SolanaToken />
+            },
+            {
+                path: '*',
+                element: <NotFound />
+            }
         ],
     },
 ];
-const router = createHashRouter(routerConfig);
+const router = createBrowserRouter(routerConfig);
 
 export const Router = () => {
     return (

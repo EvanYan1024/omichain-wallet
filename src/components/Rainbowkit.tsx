@@ -2,7 +2,7 @@ import '@rainbow-me/rainbowkit/styles.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, WagmiProvider, } from 'wagmi'
 
-import { baseSepolia, mainnet, zkSyncSepoliaTestnet } from 'wagmi/chains'
+import { baseSepolia, mainnet, sepolia, zkSyncSepoliaTestnet } from 'wagmi/chains'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
 import { ReactNode } from 'react'
@@ -43,7 +43,7 @@ const metadata = {
     icons: ['https://avatars.githubusercontent.com/u/37784886']
 }
 
-const chains = [mainnet, zkSyncSepoliaTestnet, baseSepolia] as const
+const chains = [mainnet, zkSyncSepoliaTestnet, baseSepolia, sepolia] as const
 export const config = defaultWagmiConfig({
     chains,
     projectId,
