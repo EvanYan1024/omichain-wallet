@@ -1,6 +1,5 @@
 import { connect, disconnect, useStarknetkitConnectModal } from "starknetkit";
 import { shortString, Contract, typedData, hash } from "starknet";
-import ArgentAccountABI from "../ArgentAccount.json";
 import { useState } from "react";
 import {
   Button,
