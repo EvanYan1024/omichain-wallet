@@ -4,6 +4,7 @@ import path from "path";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import fs from "fs";
 import type { ConfigEnv, Plugin } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 
 const particleWasmPlugin: Plugin | undefined = {
   name: "particle-wasm",
@@ -42,6 +43,7 @@ export default defineConfig({
       protocolImports: true,
     }),
     particleWasmPlugin,
+    tailwindcss(),
   ],
   resolve: {
     alias: {

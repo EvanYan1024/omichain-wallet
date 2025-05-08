@@ -109,7 +109,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
   }, []);
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} onError={onError}>
+      <WalletProvider wallets={wallets} onError={onError} autoConnect>
         <WalletModalProvider>
           <SolConnector />
           {children}

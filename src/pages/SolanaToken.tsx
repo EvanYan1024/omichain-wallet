@@ -16,7 +16,7 @@ import {
   Select,
 } from "@chakra-ui/react";
 import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
-import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
+import { Cluster, Connection, PublicKey } from "@solana/web3.js";
 import { useState, useEffect } from "react";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { percentAmount, generateSigner, some } from "@metaplex-foundation/umi";
@@ -31,6 +31,13 @@ import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import bs58 from "bs58";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
+export const clusterApiUrl = (cluster?: Cluster) => {
+  if (cluster === "devnet") {
+    return "https://api.devnet.solana.com";
+  }
+  return "https://nameless-quaint-waterfall.solana-mainnet.quiknode.pro/162133a9db1841a2bc0e561c16bd4dde5d59915e/";
+};
+
 // 定义本地存储中保存的 Token 信息类型
 interface SavedToken {
   mintAddress: string;
@@ -38,13 +45,20 @@ interface SavedToken {
   symbol: string;
   decimals: number;
   createdAt: number;
+  network: string; // 添加网络信息
 }
+
+// 定义网络类型
+type NetworkType = "devnet" | "mainnet-beta";
 
 export default function SolanaToken() {
   const wallet = useWallet();
   const { publicKey, connected } = wallet;
   const toast = useToast();
   const anchorWallet = useAnchorWallet();
+
+  // 添加网络选择状态
+  const [network, setNetwork] = useState<NetworkType>("devnet");
 
   // Token 基本信息
   const [tokenName, setTokenName] = useState("");
@@ -80,6 +94,11 @@ export default function SolanaToken() {
     loadSavedTokens();
   }, []);
 
+  // 根据当前选择的网络过滤 Token 列表
+  const filteredTokens = savedTokens.filter(
+    (token) => !token.network || token.network === network
+  );
+
   const handleCreateToken = async () => {
     if (!connected || !publicKey) {
       toast({
@@ -103,8 +122,8 @@ export default function SolanaToken() {
     try {
       setLoading(true);
 
-      // 创建 UMI 实例
-      const umi = createUmi(clusterApiUrl("devnet")).use(mplTokenMetadata());
+      // 创建 UMI 实例，使用选定的网络
+      const umi = createUmi(clusterApiUrl(network)).use(mplTokenMetadata());
 
       // 从钱包创建签名者
       // const walletAdapter = createSignerFromWallet(umi, wallet);
@@ -132,19 +151,20 @@ export default function SolanaToken() {
       const transactionLink = getExplorerLink(
         "transaction",
         signatureBase58,
-        "devnet"
+        network
       );
 
       console.log(`✅ Token 创建成功，交易链接: ${transactionLink}`);
       console.log(`✅ Mint 地址: ${mint.publicKey}`);
 
-      // 保存 Token 信息到本地存储
+      // 保存 Token 信息到本地存储，包含网络信息
       const newToken: SavedToken = {
         mintAddress: mint.publicKey.toString(),
         name: tokenName,
         symbol: tokenSymbol,
         decimals: decimals,
         createdAt: Date.now(),
+        network: network, // 保存当前网络
       };
 
       const existingTokensJson = localStorage.getItem("solana-tokens");
@@ -164,6 +184,7 @@ export default function SolanaToken() {
         description: (
           <Box>
             <p>Mint 地址: {mint.publicKey.toString()}</p>
+            <p>网络: {network}</p>
             <p>Token 已保存到本地存储</p>
             <a
               href={transactionLink}
@@ -225,8 +246,8 @@ export default function SolanaToken() {
     try {
       setMintLoading(true);
 
-      // 创建 UMI 实例
-      const umi = createUmi(clusterApiUrl("devnet")).use(mplTokenMetadata());
+      // 创建 UMI 实例，使用选定的网络
+      const umi = createUmi(clusterApiUrl(network)).use(mplTokenMetadata());
       umi.use(walletAdapterIdentity(wallet));
 
       // 获取选中的 Token 信息
@@ -262,7 +283,7 @@ export default function SolanaToken() {
       const transactionLink = getExplorerLink(
         "transaction",
         signatureBase58,
-        "devnet"
+        network
       );
 
       console.log(`✅ Token 铸造成功，交易链接: ${transactionLink}`);
@@ -274,6 +295,7 @@ export default function SolanaToken() {
             <p>
               已铸造 {mintAmount} 个 {token.symbol} 到您的钱包
             </p>
+            <p>网络: {network}</p>
             <a
               href={transactionLink}
               target="_blank"
@@ -302,6 +324,14 @@ export default function SolanaToken() {
     }
   };
 
+  // 处理网络变更
+  const handleNetworkChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newNetwork = e.target.value as NetworkType;
+    setNetwork(newNetwork);
+    // 当网络变更时，清空选中的 Token
+    setSelectedToken("");
+  };
+
   return (
     <VStack
       spacing={6}
@@ -311,6 +341,15 @@ export default function SolanaToken() {
       <Heading as="h1" size="xl">
         创建 Solana Token
       </Heading>
+
+      {/* 添加网络选择下拉框 */}
+      <FormControl>
+        <FormLabel>网络</FormLabel>
+        <Select value={network} onChange={handleNetworkChange}>
+          <option value="devnet">Devnet</option>
+          <option value="mainnet-beta">Mainnet</option>
+        </Select>
+      </FormControl>
 
       <FormControl isRequired>
         <FormLabel>Token 名称</FormLabel>
@@ -380,7 +419,7 @@ export default function SolanaToken() {
       </Button>
 
       {/* 铸造 Token 部分 */}
-      {savedTokens.length > 0 && (
+      {filteredTokens.length > 0 && (
         <>
           <Divider my={4} />
           <Heading as="h2" size="lg">
@@ -394,7 +433,7 @@ export default function SolanaToken() {
               onChange={(e) => setSelectedToken(e.target.value)}
               placeholder="选择要铸造的 Token"
             >
-              {savedTokens.map((token) => (
+              {filteredTokens.map((token) => (
                 <option key={token.mintAddress} value={token.mintAddress}>
                   {token.name} ({token.symbol})
                 </option>
@@ -425,15 +464,15 @@ export default function SolanaToken() {
       )}
 
       {/* 已保存的 Token 列表 */}
-      {savedTokens.length > 0 && (
+      {filteredTokens.length > 0 && (
         <>
           <Divider my={4} />
           <Heading as="h2" size="lg">
-            我的 Token 列表
+            我的 Token 列表 ({network})
           </Heading>
 
           <VStack spacing={3} width="full" align="stretch">
-            {savedTokens.map((token) => (
+            {filteredTokens.map((token) => (
               <Box
                 key={token.mintAddress}
                 p={3}
@@ -448,6 +487,7 @@ export default function SolanaToken() {
                   Mint: {token.mintAddress}
                 </Text>
                 <Text fontSize="sm">小数位数: {token.decimals}</Text>
+                <Text fontSize="sm">网络: {token.network || "devnet"}</Text>
                 <Text fontSize="sm">
                   创建时间: {new Date(token.createdAt).toLocaleString()}
                 </Text>
